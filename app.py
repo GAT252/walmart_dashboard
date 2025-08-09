@@ -4,7 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 
-# --- データ読み込み ---
+#データ読み込み
 @st.cache_data
 def load_data():
     df = pd.read_csv("Walmart_Sales.csv")
@@ -13,7 +13,7 @@ def load_data():
 
 df = load_data()
 
-# --- サイドバー：フィルター設定 ---
+#サイドバー：フィルター設定
 st.sidebar.header("フィルター設定")
 store_list = sorted(df["Store"].unique())
 selected_store = st.sidebar.selectbox("店舗を選択", store_list)
@@ -29,14 +29,14 @@ fuel_price_factor = st.sidebar.slider("Fuel_Price 倍率", 0.5, 2.0, 1.0, 0.05)
 cpi_factor = st.sidebar.slider("CPI 倍率", 0.5, 2.0, 1.0, 0.05)
 unemployment_factor = st.sidebar.slider("Unemployment 倍率", 0.5, 2.0, 1.0, 0.05)
 
-# --- データ絞り込み ---
+#データ絞り込み
 filtered_df = df[(df["Store"] == selected_store) &
                  (df["Date"] >= pd.to_datetime(date_range[0])) &
                  (df["Date"] <= pd.to_datetime(date_range[1]))].copy()
 filtered_df.sort_values("Date", inplace=True)
 filtered_df.set_index("Date", inplace=True)
 
-# --- 時系列可視化ダッシュボード ---
+#時系列可視化ダッシュボード
 st.title("📊 Walmart 売上 時系列ダッシュボード + 予測")
 st.write(f"選択店舗: {selected_store}")
 
@@ -60,7 +60,7 @@ st.subheader("祝日 vs 通常週")
 holiday_avg = filtered_df.groupby("Holiday_Flag")["Weekly_Sales"].mean()
 st.bar_chart(holiday_avg)
 
-# --- SARIMAX 予測 ---
+#SARIMAX 予測
 st.subheader("📈 売上予測（SARIMAX + 外部特徴量）")
 
 factors = {
@@ -118,7 +118,7 @@ with st.spinner("SARIMAXモデルを学習中..."):
     pred_ci = pred.conf_int()
     predicted_sales = pred.predicted_mean
 
-# --- プロット ---
+#プロット
 fig3, ax3 = plt.subplots(figsize=(14, 5))
 ax3.plot(y.index, y, label="real_sales", color="green")
 ax3.plot(train_index, train_fitted, label="past_prediction", color="blue")
@@ -132,6 +132,6 @@ plt.xticks(rotation=45)
 plt.tight_layout()
 st.pyplot(fig3)
 
-# --- データ表示 ---
+#データ表示
 with st.expander("🧾 データ確認"):
     st.dataframe(filtered_df.tail(10))
